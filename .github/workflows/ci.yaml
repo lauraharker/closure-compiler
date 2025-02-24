@@ -38,8 +38,6 @@ jobs:
   tag_release_version_id:
     name: Tag Release Version ID
     runs-on: ubuntu-latest
-    env:
-      PIPER_INFO: 
     steps:
         # Checkout most recent two commits
       - name: Checkout Current closure-compiler Commit
@@ -64,14 +62,17 @@ jobs:
         run:  |
          # Skip tagging script if the Piper cut CL is unchanged from prev commit 
          if [[ -n $(git diff  HEAD~1 -- ./github/piper-cut-cl.json) ]]; then \
-         .github/ci_support/tag_release_version.sh \
-             "${{fromJson(env.PIPER_JSON).piperCutCL}}" \
-             "${{fromJson(env.PIPER_JSON).versionId}}"; fi
+             .github/ci_support/tag_release_version.sh \
+                 "${{fromJson(env.PIPER_JSON).piperCutCL}}" \
+                 "${{fromJson(env.PIPER_JSON).versionId}}"; \
+         else \
+           echo "No change found in piper-cut-cl.json; skipping tagging" \
+        fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push tag
         run:   |
-          if [[ -n "$RELEASE_TAG ]]; then git push origin "$RELEASE_TAG"; fi
+          if [[ -n "$RELEASE_TAG" ]]; then git push origin "$RELEASE_TAG"; fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
