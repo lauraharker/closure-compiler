@@ -54,10 +54,11 @@ jobs:
 
       - id: set_piper_json_vars
         run: |
-          content=`cat ./.github/piper-cut-cl.json`
-          # required for multi line json
-          content="${content//$'\n'/'%0A'}"
-          echo "PIPER_JSON=$content >> $GITHUB_ENV"
+            {
+                echo 'PIPER_JSON<<EOF'
+                cat ./.github/piper-cut-cl.json
+                echo EOF
+            } >> "$GITHUB_ENV"
 
       - name: Tag cut CL
         run:  |
