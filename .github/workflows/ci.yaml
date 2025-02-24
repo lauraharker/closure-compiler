@@ -223,3 +223,9 @@ jobs:
              "${{fromJson(steps.set_var.outputs.piperJson).versionId}}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push tag
+        run:   |
+          if [[ -n "$RELEASE_TAG ]]; then git push origin "$RELEASE_TAG"; fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -41,7 +41,8 @@ main() {
 
     echo "Tagging commit $COMMIT with version $version_id"
     git tag -a "$version_id" -m "Release $version_id" "$COMMIT"
-    git push origin $version_id
+    # Make $RELEASE_TAG available for future workflow steps
+    echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
 }
 
 (( $# == 2 )) || usage_exit 'incorrect argument count\n' "$@"
