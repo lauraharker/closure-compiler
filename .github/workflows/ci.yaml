@@ -185,3 +185,41 @@ jobs:
         env:
           SONATYPE_USERNAME: closure-compiler
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+
+
+  tag_release_version_id:
+    name: Tag Release Version ID
+    runs-on: ubuntu-latest
+    env:
+      PIPER_INFO: 
+    needs:
+      - build-and-test
+    steps:
+        # Checkout most recent two commits
+      - name: Checkout Current closure-compiler Commit
+        # https://github.com/marketplace/actions/checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      # end early if the contents of piper-cut-cl.json have not changed from the previous commit?
+      # or - we can't apparently just end early without having the job marked as a "failure()" :( :(
+      # but could skip the following steps??
+
+      - id: set_piper_json_vars
+        run: |
+          content=`cat ./github/piper-cut-cl.json`
+          # required for multi line json
+          content="${content//$'\n'/'%0A'}"
+          echo "::set-output name=piperJson::$content"
+          echo "::set-output name=piperJsonOld::$content"
+
+      - name: Tag cut CL
+        run:  |
+         # Skip tagging script if the Piper cut CL is unchanged from prev commit
+         git diff  HEAD~1 -- ./github/piper-cut-cl.json &&
+         .github/ci_support/tag_release_version.sh |
+             "${{fromJson(steps.set_var.outputs.piperJson).piperCutCL}}" |
+             "${{fromJson(steps.set_var.outputs.piperJson).versionId}}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

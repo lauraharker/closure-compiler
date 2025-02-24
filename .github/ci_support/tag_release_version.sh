@@ -23,6 +23,8 @@ main() {
     local -r piper_cut_cl=$1
     local -r version_id=$2
 
+    # Fetch all tags from origin (this is possibly expensive but still cheaper than fetching evertyhing)
+    git fetch origin 'refs/tags/*:refs/tags/*'
     existing=$(git tag -l "$version_id")
     # Check if the version ID is already tagged.
     if [ -n "$existing" ]; then
@@ -39,6 +41,7 @@ main() {
 
     echo "Tagging commit $COMMIT with version $version_id"
     git tag -a "$version_id" -m "Release $version_id" "$COMMIT"
+    git push origin $version_id
 }
 
 (( $# == 2 )) || usage_exit 'incorrect argument count\n' "$@"
