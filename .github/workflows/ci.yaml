@@ -208,7 +208,7 @@ jobs:
 
       - id: set_piper_json_vars
         run: |
-          content=`cat ./github/piper-cut-cl.json`
+          content=`cat ./.github/piper-cut-cl.json`
           # required for multi line json
           content="${content//$'\n'/'%0A'}"
           echo "::set-output name=piperJson::$content"
