@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     https://www.apache.org/licenses/LICENSE-2.0
+# https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,12 +19,12 @@ name: Compiler CI
 # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#on
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
   schedule:
-    # Daily at 12pm UTC
-    - cron: '0 12 * * *'
+  # Daily at 12pm UTC
+  - cron: '0 12 * * *'
 
 permissions:
   contents: read
@@ -39,40 +39,36 @@ jobs:
     name: Tag Release Version ID
     runs-on: ubuntu-latest
     steps:
-        # Checkout most recent two commits
-      - name: Checkout Current closure-compiler Commit
-        # https://github.com/marketplace/actions/checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
+    # Checkout most recent two commits
+    - name: Checkout Current closure-compiler Commit
+      # https://github.com/marketplace/actions/checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
 
-      # end early if the contents of piper-cut-cl.json have not changed from the previous commit?
-      # or - we can't apparently just end early without having the job marked as a "failure()" :( :(
-      # but could skip the following steps??
+    - id: set_piper_json_vars
+      run: |
+        {
+            echo 'PIPER_JSON<<EOF'
+            cat ./.github/piper-cut-cl.json
+            echo EOF
+        } >> "$GITHUB_ENV"
 
-      - id: set_piper_json_vars
-        run: |
-            {
-                echo 'PIPER_JSON<<EOF'
-                cat ./.github/piper-cut-cl.json
-                echo EOF
-            } >> "$GITHUB_ENV"
-
-      - name: Tag cut CL
-        run:  |
-         # Skip tagging script if the Piper cut CL is unchanged from prev commit 
-         if [[ -n $(git diff  HEAD~1 -- ./github/piper-cut-cl.json) ]]; then \
+    - name: Tag cut CL
+      run: |
+        # Skip tagging script if the Piper cut CL is unchanged from prev commit
+        if [[ -n $(git diff  HEAD~1 -- ./github/piper-cut-cl.json) ]]; then
              .github/ci_support/tag_release_version.sh \
                  "${{fromJson(env.PIPER_JSON).piperCutCL}}" \
-                 "${{fromJson(env.PIPER_JSON).versionId}}"; \
-         else \
-           echo "No change found in piper-cut-cl.json; skipping tagging" \
+                 "${{fromJson(env.PIPER_JSON).versionId}}";
+        else
+           echo "No change found in piper-cut-cl.json; skipping tagging"
         fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Push tag
-        run:   |
-          if [[ -n "$RELEASE_TAG" ]]; then git push origin "$RELEASE_TAG"; fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Push tag
+      run: |
+        if [[ -n "$RELEASE_TAG" ]]; then git push origin "$RELEASE_TAG"; fi
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
