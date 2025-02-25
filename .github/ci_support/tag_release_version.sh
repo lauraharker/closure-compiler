@@ -30,9 +30,6 @@ main() {
       exit 0
     fi
 
-    # Find the commit that was submmited at or most immediately before the cut CL.
-    # TODO: at this point we've fetched all tags but only the most recent 2 commits -
-    # what's the cheapest way to get more data?
     COMMIT=$(.github/ci_support/find_cut_piper_cl.sh $piper_cut_cl)
     # check that the commit variable is not empty
     if [[ -z "$COMMIT" ]]; then
@@ -42,8 +39,7 @@ main() {
 
     echo "Tagging commit $COMMIT with version $version_id"
     git tag -a "$version_id" -m "Release $version_id" "$COMMIT"
-    # Make $RELEASE_TAG available for future workflow steps
-    echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
+    git push origin master "$version_id"
 }
 
 (( $# == 2 )) || usage_exit 'incorrect argument count\n' "$@"

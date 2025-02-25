@@ -38,6 +38,8 @@ jobs:
   tag_release_version_id:
     name: Tag Release Version ID
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
     # Checkout most recent two commits
     - name: Checkout Current closure-compiler Commit
@@ -51,6 +53,7 @@ jobs:
         PIPER_DIFF=$(git diff HEAD~1 -- .github/piper-cut-cl.json)
         FOUND_NEW_RELEASE=$([ -n "$PIPER_DIFF" ] && echo "true" || echo "false")
         echo "foundNewRelease=$FOUND_NEW_RELEASE" >> "$GITHUB_OUTPUT"
+        echo "foundNewRelease: $FOUND_NEW_RELEASE"
 
     - id: set_piper_json_vars
       run: |
@@ -73,22 +76,11 @@ jobs:
       id: tag_cut_cl
       if: ${{ steps.detect_changes.outputs.foundNewRelease == 'true' }}
       run: |
-        # Skip tagging script if the Piper cut CL is unchanged from prev commit
-        if [[ -n $(git diff  HEAD~1 -- ./.github/piper-cut-cl.json) ]]; then
-             .github/ci_support/tag_release_version.sh \
-                 "${{ fromJson(env.piperJson).piper_cut_cl }}" \
-                 "${{ fromJson(env.piperJson).version_id }}";
-             echo "releaseTag=$RELEASE_TAG" >> $GITHUB_OUTPUT
-        else
-           echo "No change found in piper-cut-cl.json; skipping tagging"
-        fi
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          .github/ci_support/tag_release_version.sh \
+              "${{ fromJson(env.piperJson).piper_cut_cl }}" \
+              "${{ fromJson(env.piperJson).version_id }}";
       env:
         piperJson: ${{ steps.set_piper_json_vars.outputs.piperJson }}
-
-    - name: Push tag
-      if: ${{ steps.detect_changes.outputs.foundNewRelease == 'true' }}
-      run: |
-        if [[ -n "$RELEASE_TAG" ]]; then git push origin "$RELEASE_TAG"; fi
-      env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        releaseTag: ${{ steps.tag_cut_cl.outputs.releaseTag }}
