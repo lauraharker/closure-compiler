@@ -1,11 +1,10 @@
 #!/bin/bash
 set -e
 
-
 err_exit() {
   printf "$@\n" >&2
   exit 1
-} 
+}
 
 usage_exit() {
   cat <<_eof_
