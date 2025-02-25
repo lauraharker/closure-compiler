@@ -20,7 +20,7 @@ _eof_
 }
 
 # Expect a single argument specifying the release cut CL number
-find_piper_cut_cl() {
+find_piper_cut_commit() {
   local -r cut_cl=$1
   # 1. Get git commit IDs and their corresponding CLs from the git log.
   # 2. select and print the commit ID associated with the highest CL# that is
@@ -86,7 +86,7 @@ main() {
       exit 0
     fi
 
-    COMMIT=$(find_cut_piper_cl $piper_cut_cl)
+    COMMIT=$(find_piper_cut_commit $piper_cut_cl)
     # check that the commit variable is not empty
     if [[ -z "$COMMIT" ]]; then
       echo "No commit found prior to CL $piper_cut_cl"
