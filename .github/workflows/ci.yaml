@@ -46,30 +46,44 @@ jobs:
       with:
         fetch-depth: 2
 
+    - id: detect_changes
+      run: |
+        FOUND_NEW_RELEASE=$([ -n $(git diff HEAD~1 -- .github/piper-cut-cl.json) ] && "true" || echo "false")
+        echo "foundNewRelease=$FOUND_NEW_RELEASE" >> "$GITHUB_OUTPUT"
+
     - id: set_piper_json_vars
       run: |
         {
-            echo 'PIPER_JSON<<EOF'
+            echo 'piperJson<<EOF'
             cat ./.github/piper-cut-cl.json
             echo EOF
         } >> "$GITHUB_OUTPUT"
 
+    # If we need to cut a new release, check out all the historical commits/tags.
+    # This is much more expensive than just checking out the most recent
+    # 2 commits, so we only do it if needed.
+    - name: Checkout all closure-compiler commits and tags
+      uses: actions/checkout@v4
+      if: ${{ steps.detect_changes.outputs.foundNewRelease == 'true' }}
+      with:
+        fetch-depth: 0
+
     - name: Tag cut CL
+      if: ${{ steps.detect_changes.outputs.foundNewRelease == 'true' }}
       run: |
         # Skip tagging script if the Piper cut CL is unchanged from prev commit
         if [[ -n $(git diff  HEAD~1 -- ./.github/piper-cut-cl.json) ]]; then
-             echo "env.PIPER_JSON:"
-             echo "${{ env.PIPER_JSON }}"
              .github/ci_support/tag_release_version.sh \
-                 "${{ fromJson(env.PIPER_JSON).piper_cut_cl }}" \
-                 "${{ fromJson(env.PIPER_JSON).version_id }}";
+                 "${{ fromJson(env.piperJson).piper_cut_cl }}" \
+                 "${{ fromJson(env.piperJson).version_id }}";
         else
            echo "No change found in piper-cut-cl.json; skipping tagging"
         fi
       env:
-        PIPER_JSON: ${{ steps.set_piper_json_vars.outputs.PIPER_JSON }}
+        piperJson: ${{ steps.set_piper_json_vars.outputs.piperJson }}
 
     - name: Push tag
+      if: ${{ steps.detect_changes.outputs.foundNewRelease == 'true' }}
       run: |
         if [[ -n "$RELEASE_TAG" ]]; then git push origin "$RELEASE_TAG"; fi
       env:

@@ -23,15 +23,16 @@ main() {
     local -r piper_cut_cl=$1
     local -r version_id=$2
 
-    # Fetch all tags from origin (this is possibly expensive but still cheaper than fetching evertyhing)
-    git fetch origin 'refs/tags/*:refs/tags/*'
     existing=$(git tag -l "$version_id")
     # Check if the version ID is already tagged.
     if [ -n "$existing" ]; then
       echo "Tag already exists for version '$version_id'"
       exit 0
     fi
+
     # Find the commit that was submmited at or most immediately before the cut CL.
+    # TODO: at this point we've fetched all tags but only the most recent 2 commits -
+    # what's the cheapest way to get more data?
     COMMIT=$(.github/ci_support/find_cut_piper_cl.sh $piper_cut_cl)
     # check that the commit variable is not empty
     if [[ -z "$COMMIT" ]]; then

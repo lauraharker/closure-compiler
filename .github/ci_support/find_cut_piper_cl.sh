@@ -5,23 +5,13 @@ usage_exit() {
 USAGE: $(basename "$0") CUT_CL
 
 CUT_CL - # of the Piper CL where a release was cut
-
-This command must be run in a git repository for closure-compiler
-with the master branch checked out and a recent commit pulled.
 _eof_
   printf '====\n'
   err_exit "$@"
 }
 
-# Used to check whether we are in a closure-compiler git repo.
-readonly GITHUB_URL=git@github.com:google/closure-compiler.git
-
 main() {
   local -r cut_cl=$1
-
-  if [[ "$(git remote get-url origin)" != "$GITHUB_URL" ]]; then
-    err_exit 'This is not a closure-compiler git repository.\n'
-  fi
 
 #  TODO: are these steps useful still when running from GitHub actions, isntead of
 # locally?
