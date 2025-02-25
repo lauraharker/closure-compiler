@@ -37,6 +37,10 @@ env:
 jobs:
   tag_release_version_id:
     name: Tag Release Version ID
+    # Run on a push to master but not on a pull request
+    # Pull requests are not necessarily trusted to configure the 
+    # correct release tag.
+    if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
