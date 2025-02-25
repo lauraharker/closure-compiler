@@ -68,9 +68,9 @@ jobs:
             echo EOF
         } >> "$GITHUB_OUTPUT"
 
-    # If we need to cut a new release, check out all the historical commits/tags.
+    # Check out all historical commits
     # This is much more expensive than just checking out the most recent
-    # 2 commits, so we only do it if needed.
+    # 2 commits, as done above, so only do this if actually cutting a release
     - name: Checkout all closure-compiler commits and tags
       uses: actions/checkout@v4
       if: ${{ steps.detect_changes.outputs.foundNewRelease == 'true' }}
