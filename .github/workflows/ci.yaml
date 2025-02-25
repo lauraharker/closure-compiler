@@ -46,7 +46,7 @@ jobs:
       with:
         fetch-depth: 2
 
-    - id: set_piper_json
+    - id: set_piper_json_vars
       run: |
         {
             echo 'PIPER_JSON<<EOF'
@@ -59,14 +59,14 @@ jobs:
         # Skip tagging script if the Piper cut CL is unchanged from prev commit
         if [[ -n $(git diff  HEAD~1 -- ./.github/piper-cut-cl.json) ]]; then
              .github/ci_support/tag_release_version.sh \
-                 "${{ fromJson(env.PIPER_JSON).piperCutCL }}" \
-                 "${{ fromJson(env.PIPER_JSON).versionId }}";
+                 "${{ env.PIPER_JSON.piperCutCL }}" \
+                 "${{ env.PIPER_JSON.versionId }}";
         else
            echo "No change found in piper-cut-cl.json; skipping tagging"
         fi
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        PIPER_JSON: ${{steps.set_piper_json.PIPER_JSON}}
+        PIPER_JSON: ${{ fromJson(steps.set_piper_json_vars.outputs.PIPER_JSON) }}
 
     - name: Push tag
       run: |
