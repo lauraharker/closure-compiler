@@ -58,6 +58,8 @@ jobs:
       run: |
         # Skip tagging script if the Piper cut CL is unchanged from prev commit
         if [[ -n $(git diff  HEAD~1 -- ./.github/piper-cut-cl.json) ]]; then
+             echo "env.PIPER_JSON:"
+             echo "${{ env.PIPER_JSON }}"
              .github/ci_support/tag_release_version.sh \
                  "${{ fromJson(env.PIPER_JSON).piperCutCL }}" \
                  "${{ fromJson(env.PIPER_JSON).versionId }}";
