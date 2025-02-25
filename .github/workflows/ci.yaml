@@ -48,7 +48,8 @@ jobs:
 
     - id: detect_changes
       run: |
-        FOUND_NEW_RELEASE=$([ -n $(git diff HEAD~1 -- .github/piper-cut-cl.json) ] && "true" || echo "false")
+        PIPER_DIFF=$(git diff HEAD~1 -- .github/piper-cut-cl.json)
+        FOUND_NEW_RELEASE=$([ -n "$PIPER_DIFF" ] && echo "true" || echo "false")
         echo "foundNewRelease=$FOUND_NEW_RELEASE" >> "$GITHUB_OUTPUT"
 
     - id: set_piper_json_vars
@@ -69,6 +70,7 @@ jobs:
         fetch-depth: 0
 
     - name: Tag cut CL
+      id: tag_cut_cl
       if: ${{ steps.detect_changes.outputs.foundNewRelease == 'true' }}
       run: |
         # Skip tagging script if the Piper cut CL is unchanged from prev commit
@@ -76,6 +78,7 @@ jobs:
              .github/ci_support/tag_release_version.sh \
                  "${{ fromJson(env.piperJson).piper_cut_cl }}" \
                  "${{ fromJson(env.piperJson).version_id }}";
+             echo "releaseTag=$RELEASE_TAG" >> $GITHUB_OUTPUT
         else
            echo "No change found in piper-cut-cl.json; skipping tagging"
         fi
@@ -88,3 +91,4 @@ jobs:
         if [[ -n "$RELEASE_TAG" ]]; then git push origin "$RELEASE_TAG"; fi
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        releaseTag: ${{ steps.tag_cut_cl.outputs.releaseTag }}
