@@ -49,6 +49,7 @@ jobs:
         fetch-depth: 2
         sparse-checkout: |
           .github/piper-cut-cl.json
+          .github/ci_support/tag_release_version.sh
         sparse-checkout-cone-mode: false
 
     - id: detect_changes
