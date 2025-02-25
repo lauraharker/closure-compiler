@@ -65,7 +65,6 @@ jobs:
            echo "No change found in piper-cut-cl.json; skipping tagging"
         fi
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         PIPER_JSON: ${{ fromJson(steps.set_piper_json_vars.outputs.PIPER_JSON) }}
 
     - name: Push tag
