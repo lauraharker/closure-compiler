@@ -59,6 +59,7 @@ jobs:
         echo "foundNewRelease: $FOUND_NEW_RELEASE"
 
     - id: set_piper_json_vars
+      if: ${{ steps.detect_changes.outputs.foundNewRelease == 'true' }}
       run: |
         {
             echo 'piperJson<<EOF'
