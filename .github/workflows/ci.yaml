@@ -61,8 +61,8 @@ jobs:
              echo "env.PIPER_JSON:"
              echo "${{ env.PIPER_JSON }}"
              .github/ci_support/tag_release_version.sh \
-                 "${{ fromJson(env.PIPER_JSON).piperCutCL }}" \
-                 "${{ fromJson(env.PIPER_JSON).versionId }}";
+                 "${{ fromJson(env.PIPER_JSON).piper_cut_cl }}" \
+                 "${{ fromJson(env.PIPER_JSON).version_id }}";
         else
            echo "No change found in piper-cut-cl.json; skipping tagging"
         fi
