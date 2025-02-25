@@ -86,7 +86,7 @@ main() {
       exit 0
     fi
 
-    COMMIT=$(.github/ci_support/find_cut_piper_cl.sh $piper_cut_cl)
+    COMMIT=$(find_cut_piper_cl $piper_cut_cl)
     # check that the commit variable is not empty
     if [[ -z "$COMMIT" ]]; then
       echo "No commit found prior to CL $piper_cut_cl"
