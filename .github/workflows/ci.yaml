@@ -41,12 +41,15 @@ jobs:
     permissions:
       contents: write
     steps:
-    # Checkout most recent two commits
+    # Checkout the piper-cut-cl.json from the most recent two commits
     - name: Checkout Current closure-compiler Commit
       # https://github.com/marketplace/actions/checkout
       uses: actions/checkout@v4
       with:
         fetch-depth: 2
+        sparse-checkout: |
+          .github/piper-cut-cl.json
+        sparse-checkout-cone-mode: false
 
     - id: detect_changes
       run: |
